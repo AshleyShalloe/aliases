@@ -111,6 +111,14 @@
                 font-size: medium;
             }
         }
+        .star{
+            width: 0.1vw;
+            height: 0.1vw;
+            background: white;
+            border-radius: 100%;
+            z-index: -20;
+            position: fixed;
+        }
     </style>
 </head>
 
@@ -165,7 +173,7 @@
     <div class="result" id="filter_list"></div>
     <h4>SQL WHERE clause<button class="clippy_button" onclick="copyToClipboard(this, document.getElementById('sql_clause').innerText)">Copy to clipboard</button></h4>
     <div class="result" id="sql_clause"></div>
-
+    <div id="starfieldContainer"></div>
 </body>
 <script>
     'use strict'
@@ -248,8 +256,18 @@
         setTimeout(function () { button_element.innerText = "Copy to clipboard" }, 5000)
     }
 
+    async function generateStarField(numberOfStars){
+        for (var i=0; i<numberOfStars; i++){
+            var xPos = 100 * Math.random()
+            var yPos = 100 * Math.random()
+            var starHtml = `<div class='star' style='left: ${xPos}%; top: ${yPos}%'></div>`
+            document.getElementById("starfieldContainer").innerHTML += starHtml
+        }
+    }
+
     function init() {
         get_alias_key(true);
+        generateStarField(500);
     }
 
     init();
