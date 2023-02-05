@@ -1,0 +1,240 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"/>
+<link rel="icon" href="favicon.svg" />
+<style>
+html{
+    font-family: monospace;
+    display: flex;
+    background: slateblue;
+}
+
+html.sans_serif{
+    font-family: sans-serif;
+}
+
+body{
+    margin: 0 auto;
+    max-width: 750px;
+    min-width: 500px;
+    background: white;
+    height: fit-content;
+    padding-top: 2em;
+    padding-bottom: 2em;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    padding-left: 1em;
+    padding-right: 1em;
+    box-shadow: 0px 0px 10px #0000006e;
+    border-radius: 1em;
+}
+
+.collapse_section{
+    color: black;
+    transition: color 0.5s;
+    max-width: 750px;
+}
+
+.collapsed .collapse_section{
+    height: 0;
+    overflow-y: hidden;
+    color: white;
+}
+
+.collapse_indicator{
+    display: inline-block;
+    transition: transform 1s;
+    margin-left: 0.5em;
+    user-select: none;
+    cursor: pointer;
+}
+
+.collapsed .collapse_indicator{
+    transform: rotate(-540deg);
+}
+
+.lineage_bubble{
+    background: #d7d2fb;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    border-radius: 1em;
+}
+
+.result{
+    padding: 1em;
+    background: lightgray;
+    overflow-y: auto;
+    border-radius: 1em;
+    font-family: monospace;
+}
+
+input{
+    padding: 1em;
+    border-radius: 1em;
+    height: 1em;
+    border: 1px solid gray;
+}
+
+.clippy_button, #monospace_toggle{
+    float: right;
+    border-radius: 0.3em;
+    border: 1px solid grey;
+    background: lightgray;
+    cursor: pointer;
+}
+
+.clippy_button:hover, #monospace_toggle:hover{
+    border: 1px solid black;
+    background: rgb(239, 238, 238);
+    color: black;
+}
+
+.clippy_button:active, #monospace_toggle:active{
+    border: 1px solid black;
+    background: grey;
+    color: white;
+}
+
+</style>
+</head>
+<body>
+<h1>Get lineage aliases</h1>
+<div class="collapse_section_container collapsed"> 
+    <h2>Explainy bit<div class="collapse_indicator" onclick="this.parentElement.parentElement.classList.toggle('collapsed')">▼</div></h2>
+    <div class="collapse_section">
+        <h3>What this is?<button id="monospace_toggle" onclick="document.getElementsByTagName('html')[0].classList.toggle('sans_serif'); this.innerText = 'Toggle font'">Aagghhh my eyes</button></h3>
+        <p>If you type in a lineage, for example <span class="lineage_bubble">BA.5</span>, you get back a list of <span class="lineage_bubble">BA.5</span> aliases.</p>
+
+        <h3>What this is not</h3>
+        <p>This is not a list of all sublineages. Just the aliases.</p>
+        <p>For example, if you put in <span class="lineage_bubble">BA.5</span>, you will not get <span class="lineage_bubble">BA.5.3</span>.<p>
+        <p>But you will get <span class="lineage_bubble">BA.5.3.1</span>, which is aliased to <span class="lineage_bubble">BE</span>.</p>
+        <p>We also don't validate if the lineage you enter is valid. We just trust that you know what you are doing.</p>
+        <p>Finally, this is not automatically updated. If you depend on having the very latest data, grab it from the <a href="https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json" target="_blank">pango-designation GitHub repo</a> instead.</p>
+
+        <h3>So why would I want this?</h3>
+        <p>Let's say you're trying to filter a list of PANGO lineages to just <span class="lineage_bubble">BA.5</span>. Easy enough right?</p>
+        <p>We just pick everything that starts with "<span class="lineage_bubble">BA.5</span>"</p>
+        <p>But this would miss out, say <span class="lineage_bubble">BE</span>, <span class="lineage_bubble">BF</span> and <span class="lineage_bubble">BQ</span> - which are also <span class="lineage_bubble">BA.5</span> sublineages. In fact there are many others we'd be missing out.</p>
+        <p>So what we do here is type in <span class="lineage_bubble">BA.5</span>, and now we know all the stuff we have to include in out "starts with" filter.</p>
+        <p>Alternatively, you could dealias everything and filter to stuff that starts with <span class="lineage_bubble">B.1.1.529.5</span>, but who has time for that?</p>
+
+        <h3>Why are the results presented in 3 different ways?</h3>
+        <p>
+            These are to assist my most common use cases for a list of aliases:
+            <ul>
+                <li>Joining a list of lineages with an unaliased list</li>
+                <li>Using a list of lineages to do something in Python</li>
+                <li>Writing an SQL query that filters on lineage</li>
+            </ul>
+        <p>
+
+        <h3>What about recombinants?</h3>
+        <p>I'm pretending they don't exist</p>
+
+        <h3>None of that explained anything. What is any of this?</h3>
+        <p>Oh. You might want to check out <a href="https://www.pango.network/" target="_blank">https://www.pango.network/</a> for an explanation of the PANGO naming scheme for SARS-CoV-2 lineages.</p>
+    </div>
+</div>
+<h2>The actual thing</h2>
+<h3>Input</h3>
+<input type="text" id="lineage_input" oninput="do_filter(this.value)" value="BA.5"></input>
+<h3>Result</h3>
+<h4>Python list<button class="clippy_button" onclick="copyToClipboard(this, document.getElementById('python_list').innerText)">Copy to clipboard</button></h4>
+<div class="result" id="python_list"></div>
+<h4>CSV<button class="clippy_button" onclick="copyToClipboard(this, document.getElementById('filter_list').innerText)">Copy to clipboard</button></h4>
+<div class="result" id="filter_list"></div>
+<h4>SQL WHERE clause<button class="clippy_button" onclick="copyToClipboard(this, document.getElementById('sql_clause').innerText)">Copy to clipboard</button></h4>
+<div class="result" id="sql_clause"></div>
+
+</body>
+<script>
+'use strict'
+
+var alias_key
+
+async function get_alias_key(do_init){    
+    fetch("alias_key.json")
+    .then(response => response.json())
+    .then(json => set_alias_key_global(json, do_init));
+}
+
+async function set_alias_key_global(in_json, do_init){
+    alias_key = in_json
+    if (do_init){
+        do_filter(document.getElementById("lineage_input").value)
+    }
+}
+
+function do_filter(lineage){
+    var result_list = []
+
+    lineage = lineage.toUpperCase()
+    lineage = lineage ? lineage : ""
+
+    if (lineage){
+        // add the input lineage to the start of the list
+        // but only if it isn't empty
+        result_list = [[lineage, unalias_lineage(lineage)]]
+
+        // only bother unaliasing if we have something to unalias
+        lineage = unalias_lineage(lineage)
+    }
+
+    // if lineage is blank, this effectively returns
+    // the alias_key json unfiltered
+    for (var key in alias_key){
+        var value = alias_key[key]
+        if (typeof(value) == "string"){
+            if (value.startsWith(lineage)){
+                result_list.push([key, value])
+            }
+        }
+    }
+
+    // the filter list
+    var filter_list_html = "lineage,unaliased<br>" + result_list.join("<br>")
+    document.getElementById("filter_list").innerHTML = filter_list_html
+
+    // the python list
+    var python_list = JSON.stringify(result_list.map(x => x[0]), null, 1)
+    document.getElementById("python_list").innerHTML = "lineages = " + python_list
+
+    // the sql clause
+    var sql_clause = result_list.map(x => `(lineage LIKE '${x[0]}%')`).join("<br>OR ")
+    document.getElementById("sql_clause").innerHTML = sql_clause
+}
+
+function unalias_lineage(input_lineage){
+    var isWithdrawn = input_lineage[0] == "*"
+    var stem = input_lineage.split(".")[0].replace("*", "")
+    var rest_of_it = input_lineage.split(".").slice(1, input_lineage.split(".").length).join(".")
+
+    if (alias_key[stem] && (typeof(alias_key[stem] == "string"))){
+        if (isWithdrawn){
+            return "*" + alias_key[stem] + "." + rest_of_it
+        }
+        else{
+            return alias_key[stem] + "." + rest_of_it
+        }
+    }
+    else{
+        return input_lineage
+    }
+}
+
+function copyToClipboard(button_element, copy_text){
+    navigator.clipboard.writeText(copy_text)
+    button_element.innerText = "Copied"
+    setTimeout(function(){button_element.innerText = "Copy to clipboard"}, 5000)
+}
+
+function init(){
+    get_alias_key(true);
+}
+
+init();
+
+</script>
+</html>
