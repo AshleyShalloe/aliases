@@ -134,7 +134,8 @@
                     onclick="document.getElementsByTagName('html')[0].classList.toggle('sans_serif'); this.innerText = 'Toggle font'">Aagghhh
                     my eyes</button></h3>
             <p>If you type in a lineage, for example <span class="lineage_bubble">BA.5</span>, you get back a list of
-                <span class="lineage_bubble">BA.5</span> aliases.</p>
+                <span class="lineage_bubble">BA.5</span> aliases.
+            </p>
 
             <h3>What this is not</h3>
             <p>This is not a list of all sublineages. Just the aliases.</p>
@@ -264,7 +265,7 @@
 
         rest_of_it = rest_of_it.length ? "." + rest_of_it : ""
 
-        if (alias_key[stem] && (typeof (alias_key[stem] == "string"))) {
+        if (alias_key[stem] && (typeof (alias_key[stem]) == "string")) {
             if (isWithdrawn) {
                 return "*" + alias_key[stem] + rest_of_it
             }
@@ -276,7 +277,6 @@
             return input_lineage
         }
     }
-
     function copyToClipboard(button_element, copy_text) {
         navigator.clipboard.writeText(copy_text)
         button_element.innerText = "Copied"
