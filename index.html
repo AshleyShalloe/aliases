@@ -254,7 +254,7 @@
         document.getElementById("python_list").innerHTML = "lineages = " + python_list
 
         // the sql clause
-        var sql_clause = result_list.map(x => `(lineage LIKE '${x[0]}%')`).join("<br>OR ")
+        var sql_clause = result_list.map(x => `(lineage LIKE '${x[0]}.%') OR (lineage = '${x[0]}')`).join("<br>OR ")
         document.getElementById("sql_clause").innerHTML = sql_clause
     }
 
