@@ -239,7 +239,7 @@
         for (var key in alias_key) {
             var value = alias_key[key]
             if (typeof (value) == "string") {
-                if (value.startsWith(lineage)) {
+                if ((value == lineage) || (value.startsWith(lineage + "."))) {
                     result_list.push([key, value])
                 }
             }
