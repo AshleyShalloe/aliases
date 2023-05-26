@@ -234,8 +234,6 @@
             lineage = unalias_lineage(lineage)
         }
 
-        // if lineage is blank, this effectively returns
-        // the alias_key json unfiltered
         for (var key in alias_key) {
             var value = alias_key[key]
             if (typeof (value) == "string") {
@@ -254,7 +252,14 @@
         document.getElementById("python_list").innerHTML = "lineages = " + python_list
 
         // the sql clause
-        var sql_clause = result_list.map(x => `(lineage LIKE '${x[0]}.%') OR (lineage = '${x[0]}')`).join("<br>OR ")
+        var sql_clause = result_list.map(x => {
+            if (Object.keys(alias_key).includes(x[0]) && (typeof (alias_key[x[0]]) == "object")) {
+                return `(lineage LIKE '${x[0]}.%') OR (lineage = '${x[0]}')`
+            }
+            else {
+                return `(lineage LIKE '${x[0]}.%')`
+            }
+        }).join("<br>OR ")
         document.getElementById("sql_clause").innerHTML = sql_clause
     }
 
